@@ -92,7 +92,7 @@ function renderProductDetails(id) {
 function handleScroll() {
   const scrollHeight = document.documentElement.scrollHeight;
   const currentHeight = document.documentElement.scrollTop + window.innerHeight;
-  if (currentHeight - 10 > scrollHeight) {
+  if (currentHeight - 20 > scrollHeight) {
     currentPage += 1;
     offset += limit;
     fetchData();
