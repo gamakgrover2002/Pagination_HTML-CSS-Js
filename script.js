@@ -40,6 +40,7 @@ let limit = 9;
 let data = [];
 let offset = 0;
 let productDetails = {};
+let currentPage = 1;
 
 async function fetchData() {
   try {
@@ -91,10 +92,11 @@ function renderProductDetails(id) {
 function handleScroll() {
   const scrollHeight = document.documentElement.scrollHeight;
   const currentHeight = document.documentElement.scrollTop + window.innerHeight;
-
   if (currentHeight - 10 > scrollHeight) {
-    offset += 9;
+    currentPage += 1;
+    offset += limit;
     fetchData();
+    renderPagination(currentPage, 22);
   }
 }
 
@@ -124,7 +126,8 @@ function renderPagination(currentPage, totalPages) {
 function handlePageChange(pageNum) {
   const totalPages = 22;
   if (pageNum >= 1 && pageNum <= totalPages) {
-    offset = (pageNum - 1) * 9;
+    currentPage = pageNum;
+    offset = (pageNum - 1) * limit;
     fetchData();
     renderPagination(pageNum, totalPages);
   }
@@ -134,6 +137,5 @@ window.addEventListener("scroll", handleScroll);
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchData();
-
-  renderPagination(1, 22);
+  renderPagination(currentPage, 22);
 });
