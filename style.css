@@ -1,0 +1,95 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+.product-div {
+  font-size: 2vw;
+  background-color: white;
+  border-radius: 20px;
+  width: 30vw;
+  height: 50vh;
+  box-shadow:
+    inset 5px 5px 10px black,
+    inset -5px -5px 10px black;
+  text-align: center;
+  margin-bottom: 1vw;
+}
+#products-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
+.details {
+  font-size: 1vw;
+  margin-top: 3vh;
+}
+.logo {
+  width: 10vw;
+  height: 10vh;
+  background-cover: cover;
+  background-repeat: no-repeat;
+}
+.active {
+  width: 1vw;
+  height: 1vw;
+  background-color: lightblue;
+  color: white;
+}
+.button {
+  margin-left: 1vw;
+  margin-right: 1vw;
+  width: 1vw;
+  height: 1vw;
+}
+
+.button:hover {
+  cursor: pointer;
+}
+.side-button {
+  margin: 0.1vw;
+  width: 5vw;
+}
+.container {
+  padding: 2vw;
+}
+.pagination {
+  margin: 2vw;
+}
+.heading {
+  display: flex;
+  gap: 10vw;
+  width: 100vw;
+}
+.navs {
+  display: flex;
+  list-style: none;
+  gap: 3vw;
+}
+.navs > li {
+  font-size: 1.5vw;
+}
+.navs > li:hover {
+  color: #ff0000;
+  cursor: pointer;
+}
+.btn {
+  width: 10vw;
+  height: 6vh;
+  border-radius: 20px;
+  outline: none;
+  border: none;
+  box-shadow: 2px 2px 10px black;
+  background-color: white;
+  font-size: 1vw;
+  font-weight: bolder;
+}
+.btn:hover {
+  cursor: pointer;
+  border: none;
+  box-shadow: 2px 2px 5px black;
+}
+#btn-group {
+  display: flex;
+  gap: 5vw;
+  position: absolute;
+  right: 10vw;
+}
