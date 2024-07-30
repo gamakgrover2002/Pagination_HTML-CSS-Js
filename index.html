@@ -3,28 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Product Fetching</title>
-    <link rel="stylesheet" href="./style.css"></link>
+    <title>Pagination Example</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
-      <div class="heading">
-        <div class="logo">Logo</div>
-        <ul class="navs">
-          <li>Home</li>
-          <li>Products</li>
-          <li>About</li>
-          <li>Contact</li>
-        </ul>
-        <div id="btn-group">
-      
-        </div>
-      </div>
-      <div id="pagination" class="pagination"></div>
-      <div id="products-container"></div>
+    <div class="header">
+      <div class="logo">Logo</div>
+      <ul id="navs"></ul>
     </div>
 
-    <script src="./script.js">
-    </script>
+    <div id="products-container"></div>
+    <div id="pagination">
+      <span id="previous-button"></span>
+      <span id="number-buttons"></span>
+      <span id="next-button"></span>
+    </div>
+    <select class="options" name="offset">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <script src="Render.js"></script>
+    <script src="BaseProductAPI.js"></script>
+    <script src="ProductAPI.js"></script>
+    <script src="ProductHandle.js"></script>
+
+    <script src="script.js"></script>
   </body>
 </html>
