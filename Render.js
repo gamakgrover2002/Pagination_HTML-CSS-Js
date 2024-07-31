@@ -55,9 +55,7 @@ class Render {
     };
 
     const handlePageChangeWithScroll = (pageNum) => {
-      handleProduct.handlePageChange(pageNum).then(() => {
-        document.getElementById("products-container").scrollTo(0, 0);
-      });
+      handleProduct.handlePageChange(pageNum);
     };
 
     pagination.appendChild(

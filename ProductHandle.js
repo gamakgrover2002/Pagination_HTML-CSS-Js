@@ -65,7 +65,7 @@ class ProductHandle {
   async handlePageChange(pageNum) {
     let paginationDivs = document.getElementsByClassName("button");
     let containerDivs = document.getElementsByClassName("number-list");
-    let singleProduct = document.getElementsByClassName("product-div")[0];
+
     let productsContainer = document.getElementById("products-container");
     let scrollWidth = paginationDivs[1].clientWidth;
     if (pageNum > productAPI.currentPage) {
@@ -91,12 +91,12 @@ class ProductHandle {
         await render.renderProducts(data);
       }
     } else {
-      productAPI.currentPage = pageNum;
-      render.renderPagination(productAPI.totalPages);
-      const singlePageHeight =
-        productsContainer.scrollHeight / productAPI.getCurrentPage;
-      productsContainer.scrollTop =
-        singlePageHeight * (productAPI.currentPage - 1);
+      let clientHeight = productsContainer.clientHeight;
+      productsContainer.scrollTo({
+        top: pageNum * clientHeight,
+        behavior: "smooth",
+      });
+      renderpagination(pageNum);
     }
   }
 
