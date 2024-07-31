@@ -32,7 +32,6 @@ class Render {
     });
 
     productsContainer.appendChild(fragment);
-    console.log(data);
   }
 
   renderPagination(totalPages) {
@@ -48,7 +47,7 @@ class Render {
       className = "button"
     ) => {
       const button = document.createElement("button");
-      button.innerText = label;
+      button.innerText = label.toString();
       button.className = className;
       button.disabled = disabled;
       button.addEventListener("click", onClick);
@@ -70,26 +69,29 @@ class Render {
       )
     );
 
+    const pageNumbers = document.createElement("div");
+    pageNumbers.classList.add("number-list");
+
     for (let num = 1; num <= totalPages; num++) {
-      pagination.appendChild(
+      pageNumbers.appendChild(
         createButton(
-          num,
+          num.toString(),
           () => handlePageChangeWithScroll(num),
           false,
           num === productAPI.currentPage ? "active" : "button"
         )
       );
     }
+    pagination.appendChild(pageNumbers);
 
     pagination.appendChild(
       createButton(
         "Next",
         () => handlePageChangeWithScroll(productAPI.currentPage + 1),
-        productAPI.currentPage === productAPI.totalPages,
+        productAPI.currentPage === totalPages,
         "side-button"
       )
     );
   }
 }
-
 const render = new Render();
