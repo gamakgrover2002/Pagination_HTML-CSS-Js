@@ -56,8 +56,6 @@ class ProductHandle {
           Math.ceil(scrollHeight / (clientHeight + 200)) < this.heightArray[i]
         ) {
           productAPI.currentPage = i + 1;
-          render.renderPagination(productAPI.totalPages);
-          this.heightArray.splice(i, this.heightArray.length - i);
         }
       }
     }
@@ -96,7 +94,9 @@ class ProductHandle {
         top: pageNum * clientHeight,
         behavior: "smooth",
       });
-      renderpagination(pageNum);
+      let buttons = document.getElementsByClassName("button");
+      productAPI.currentPage = pageNum;
+      render.renderPagination(productAPI.totalPages);
     }
   }
 
