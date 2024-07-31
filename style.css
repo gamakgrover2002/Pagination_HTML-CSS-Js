@@ -151,15 +151,21 @@ body {
 }
 
 .number-list {
-  width: 30%;
   display: flex;
-  overflow-x: auto;
-  gap: 1vw;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 30%;
+  overflow-x: scroll;
+  padding: 2vw;
+  height: 10;
+  text-align: center;
+  padding-bottom: 0.1vh;
 }
 
+.number-list > button {
+  flex: 1 0 auto;
+  margin: 1rem;
+}
 #number-buttons > button {
   margin: 0 5px;
   padding: 10px 15px;

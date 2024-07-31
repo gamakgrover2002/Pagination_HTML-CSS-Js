@@ -5,17 +5,7 @@ class ProductHandle {
     this.elem = document.getElementById("products-container");
     this.pagepositions = { 1: 0 };
   }
-  handleScrollPage(page) {
-    console.log(this.pagepositions);
-    if (page in this.pagepositions) {
-      this.elem.scrollTo({
-        top: this.pagepositions[page],
-        behavior: "smooth",
-      });
-    } else {
-      this.elem.scrollTop = 0;
-    }
-  }
+
   async handleScroll() {
     let scrollTop = this.elem.scrollTop;
     let clientHeight = this.elem.clientHeight;
@@ -25,66 +15,106 @@ class ProductHandle {
       productAPI.currentPage = productAPI.totalPages;
       render.renderPagination(productAPI.totalPages);
     }
-    if (scrollTop + clientHeight >= scrollHeight - 5) {
-      try {
-        productAPI.currentPage = productAPI.prevPage + 1;
-        let data = await productAPI.fetchpagedata();
-        productAPI.offset += productAPI.limit;
-        await render.renderProducts(data);
-        render.renderPagination(productAPI.totalPages);
-        this.scrollTop = scrollTop;
-        this.pagepositions[productAPI.currentPage] = scrollTop;
-        this.heightArray.push(scrollTop);
-      } catch (error) {
-        console.error("Error fetching paged data on scroll:", error);
-      }
-    }
+    if (clientHeight + scrollTop + 1 >= scrollHeight) {
+      setTimeout(async () => {
+        try {
+          productAPI.currentPage = Math.ceil(
+            scrollHeight / (clientHeight + 200)
+          );
+          let data = await productAPI.fetchpagedata(
+            productAPI.limit,
+            productAPI.offset
+          );
 
-    for (let i = this.heightArray.length - 1; i >= 0; i--) {
-      if (scrollTop < this.heightArray[i]) {
-        productAPI.currentPage = i + 1;
-        render.renderPagination(productAPI.totalPages);
-        break;
+          productAPI.offset += productAPI.limit;
+          await render.renderProducts(data);
+          render.renderPagination(productAPI.totalPages);
+          let paginationDivs = document.getElementsByClassName("button");
+          let containerDivs = document.getElementsByClassName("number-list");
+          let scrollWidth = paginationDivs[1].clientWidth;
+
+          if (paginationDivs.length > 1 && containerDivs.length > 0) {
+            console.log(2 * scrollWidth);
+            containerDivs[0].scrollTo({
+              left: 1.5 * scrollWidth * productAPI.currentPage,
+              behavior: "smooth",
+            });
+          }
+
+          this.scrollTop = scrollTop;
+          this.pagepositions[productAPI.currentPage] = scrollTop;
+          this.heightArray[productAPI.currentPage] = Math.ceil(
+            scrollHeight / (clientHeight + 200)
+          );
+        } catch (error) {
+          console.error("Error updating pagination and scroll:", error);
+        }
+      }, 100);
+    } else {
+      for (let i = this.heightArray.length - 1; i >= 0; i--) {
+        if (
+          Math.ceil(scrollHeight / (clientHeight + 200)) < this.heightArray[i]
+        ) {
+          productAPI.currentPage = i + 1;
+          render.renderPagination(productAPI.totalPages);
+          this.heightArray.splice(i, this.heightArray.length - i);
+        }
       }
     }
   }
-
   async handlePageChange(pageNum) {
-    try {
+    let paginationDivs = document.getElementsByClassName("button");
+    let containerDivs = document.getElementsByClassName("number-list");
+    let singleProduct = document.getElementsByClassName("product-div")[0];
+    let productsContainer = document.getElementById("products-container");
+    let scrollWidth = paginationDivs[1].clientWidth;
+    if (pageNum > productAPI.currentPage) {
       if (pageNum >= 1 && pageNum <= productAPI.totalPages) {
         productAPI.currentPage = pageNum;
         render.renderPagination(productAPI.totalPages);
-        productAPI.offset = (pageNum - 1) * productAPI.limit;
 
+        if (paginationDivs.length > 1 && containerDivs.length > 0) {
+          containerDivs[0].scrollTo({
+            left: 1.75 * scrollWidth * pageNum,
+            behavior: "smooth",
+          });
+        } else {
+          console.error(
+            "Elements with the class names 'button' or 'number-list' not found."
+          );
+        }
+        productAPI.offset = (pageNum - 1) * productAPI.limit;
         let data = await productAPI.fetchpagedata(
           productAPI.limit,
           productAPI.offset
         );
-
         await render.renderProducts(data);
-        this.handleScrollPage(pageNum);
       }
-    } catch (error) {
-      console.error("Error fetching paged data on page change:", error);
+    } else {
+      productAPI.currentPage = pageNum;
+      render.renderPagination(productAPI.totalPages);
+      const singlePageHeight =
+        productsContainer.scrollHeight / productAPI.getCurrentPage;
+      productsContainer.scrollTop =
+        singlePageHeight * (productAPI.currentPage - 1);
     }
   }
 
   async handleOptionChange() {
-    try {
-      this.heightArray = [];
-      productAPI.limit = parseInt(document.querySelector(".options").value, 10);
-      productAPI.currentPage = 1;
-      productAPI.offset = 0;
-      productAPI.completeData = [];
-      let data = await productAPI.fetchpagedata(
-        productAPI.limit,
-        productAPI.offset
-      );
-      await render.renderProducts(data);
-      render.renderPagination(productAPI.totalPages);
-    } catch (error) {
-      console.error("Error fetching paged data on option change:", error);
-    }
+    this.heightArray = [];
+    productAPI.limit = document.querySelector(".options").value;
+    productAPI.currentPage = 1;
+    render.renderPagination(productAPI.totalPages);
+    this.pagepositions = {};
+
+    productAPI.offset = 0;
+    productAPI.completeData = [];
+    let data = await productAPI.fetchpagedata();
+    productAPI.offset += productAPI.limit;
+    await render.renderProducts(data);
+  }
+  catch(error) {
+    console.error("Error fetching paged data on option change:", error);
   }
 
   attachEventListeners() {
@@ -94,6 +124,5 @@ class ProductHandle {
       .addEventListener("change", this.handleOptionChange.bind(this));
   }
 }
-
 const handleProduct = new ProductHandle();
 handleProduct.attachEventListeners();

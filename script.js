@@ -14,13 +14,11 @@ numberButton.forEach((button) => {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  let data = await productAPI.fetchpagedata(
-    ProductAPI.limit,
-    ProductAPI.offset
-  );
+  let data = await productAPI.fetchpagedata();
   productAPI.offset += productAPI.limit;
   console.log(productAPI.totalPages);
   render.renderPagination(productAPI.totalPages);
+
   render.renderProducts(data);
 });
 
