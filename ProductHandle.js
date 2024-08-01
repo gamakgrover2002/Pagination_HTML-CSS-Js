@@ -1,9 +1,7 @@
 class ProductHandle {
   constructor() {
-    this.heightArray = [];
     this.scrollTop = 0;
     this.elem = document.getElementById("products-container");
-    this.pagepositions = { 1: 0 };
   }
 
   async handleScroll() {
@@ -18,50 +16,48 @@ class ProductHandle {
     if (clientHeight + scrollTop + 1 >= scrollHeight) {
       setTimeout(async () => {
         try {
+          let containerDivs = document.getElementsByClassName("number-list");
           productAPI.currentPage = Math.ceil(
             scrollHeight / (clientHeight + 200)
           );
-          let data = await productAPI.fetchpagedata(
-            productAPI.limit,
-            productAPI.offset
-          );
+          let data = await productAPI.fetchpagedata();
 
           productAPI.offset += productAPI.limit;
+
           await render.renderProducts(data);
           render.renderPagination(productAPI.totalPages);
           let paginationDivs = document.getElementsByClassName("button");
-          let containerDivs = document.getElementsByClassName("number-list");
+
           let scrollWidth = paginationDivs[1].clientWidth;
 
           if (paginationDivs.length > 1 && containerDivs.length > 0) {
             containerDivs[0].scrollTo({
-              left: 1.5 * scrollWidth * productAPI.currentPage,
+              left: 1.7 * scrollWidth * productAPI.currentPage,
             });
           }
 
           this.scrollTop = scrollTop;
-          this.pagepositions[productAPI.currentPage] = scrollTop;
-          this.heightArray.push(Math.ceil(scrollTop));
+
+          productAPI.heightArray.push(Math.ceil(scrollTop));
         } catch (error) {
           console.error("Error updating pagination and scroll:", error);
         }
-      }, 100);
+      }, 10);
     } else {
-      for (let i = 1; i < this.heightArray.length; i++) {
+      let containerDivs = document.getElementsByClassName("number-list");
+      for (let i = 1; i < productAPI.heightArray.length; i++) {
         if (
-          scrollTop >= this.heightArray[i - 1] &&
-          scrollTop < this.heightArray[i]
+          scrollTop >= productAPI.heightArray[i - 1] &&
+          scrollTop < productAPI.heightArray[i]
         ) {
           let paginationDivs = document.getElementsByClassName("button");
-          let containerDivs = document.getElementsByClassName("number-list");
           let scrollWidth = paginationDivs[1].clientWidth;
           productAPI.currentPage = i;
-          console.log(i);
+
           render.renderPagination(productAPI.totalPages);
 
           containerDivs[0].scrollTo({
-            left: scrollWidth * productAPI.currentPage,
-            behavior: "smooth",
+            left: 1.5 * scrollWidth * productAPI.currentPage,
           });
           break;
         }
@@ -70,36 +66,47 @@ class ProductHandle {
   }
   async handlePageChange(pageNum) {
     let paginationDivs = document.getElementsByClassName("button");
-
+    let containerDivs = document.getElementsByClassName("number-list");
     let productsContainer = document.getElementById("products-container");
     let scrollWidth = paginationDivs[1].clientWidth;
+
     if (pageNum > productAPI.currentPage) {
-      if (pageNum >= 1 && pageNum <= productAPI.totalPages) {
+      if (pageNum < productAPI.maxLoaaded) {
+        let clientHeight = productsContainer.clientHeight;
+        productsContainer.scrollTo({
+          top: pageNum * clientHeight,
+          behavior: "smooth",
+        });
         productAPI.currentPage = pageNum;
         render.renderPagination(productAPI.totalPages);
-
-        if (paginationDivs.length > 1 && containerDivs.length > 0) {
-          containerDivs[0].scrollTo({
-            left: 1.75 * scrollWidth * pageNum,
+      } else {
+        if (pageNum < productAPI.maxLoaaded) {
+          let clientHeight = productsContainer.clientHeight;
+          productsContainer.scrollTo({
+            top: pageNum * clientHeight,
             behavior: "smooth",
           });
+          render.renderPagination(pageNum);
         } else {
-          console.error(
-            "Elements with the class names 'button' or 'number-list' not found."
-          );
+          productAPI.currentPage = pageNum;
+          render.renderPagination(productAPI.totalPages);
+
+          if (paginationDivs.length > 1 && containerDivs.length > 0) {
+            containerDivs[0].scrollTo({
+              left: 1.75 * scrollWidth * pageNum,
+              behavior: "smooth",
+            });
+          } else {
+            console.error(
+              "Elements with the class names 'button' or 'number-list' not found."
+            );
+          }
         }
-        productAPI.offset = (pageNum - 1) * productAPI.limit;
-        let data = await productAPI.fetchpagedata(
-          productAPI.limit,
-          productAPI.offset
-        );
-        await render.renderProducts(data);
       }
     } else {
       let clientHeight = productsContainer.clientHeight;
       productsContainer.scrollTo({
         top: pageNum * clientHeight,
-        behavior: "smooth",
       });
 
       productAPI.currentPage = pageNum;
@@ -107,21 +114,45 @@ class ProductHandle {
     }
   }
 
-  async handleOptionChange() {
-    this.heightArray = [];
-    productAPI.limit = document.querySelector(".options").value;
-    productAPI.currentPage = 1;
-    render.renderPagination(productAPI.totalPages);
-    this.pagepositions = {};
+  handleOptionChange() {
+    let elem = document.getElementById("products-container");
+    let limit = document.querySelector(".options").value;
+    if (limit > productAPI.limit) {
+      this.heightArray = [];
 
-    productAPI.offset = 0;
-    productAPI.completeData = [];
-    let data = await productAPI.fetchpagedata();
-    productAPI.offset += productAPI.limit;
-    await render.renderProducts(data);
-  }
-  catch(error) {
-    console.error("Error fetching paged data on option change:", error);
+      productAPI.currentPage = Math.ceil(
+        productAPI.completeData.length / limit
+      );
+
+      let heightperpage =
+        elem.scrollHeight / (productAPI.currentPage * productAPI.offset);
+
+      render.renderPagination(productAPI.totalPages);
+      let newHeightArray = [];
+      productAPI.totalPages = Math.round(productAPI.total / limit);
+
+      for (let i = 1; i <= productAPI.totalPages; i++) {
+        newHeightArray.push(heightperpage * i);
+      }
+      productAPI.heightArray = newHeightArray;
+
+      productAPI.offset = productAPI.completeData.length % productAPI.limit;
+    } else {
+      let heightperpage =
+        elem.scrollHeight / (productAPI.currentPage * productAPI.offset);
+
+      productAPI.totalPages = Math.round(productAPI.total / limit);
+      let newHeightArray = [];
+      for (let i = 1; i <= productAPI.totalPages; i++) {
+        newHeightArray.push(heightperpage * i);
+      }
+      productAPI.heightArray = newHeightArray;
+      productAPI.currentPage = Math.ceil(
+        productAPI.completeData.length / limit
+      );
+
+      productAPI.totalPages = Math.round(productAPI.total / limit);
+    }
   }
 
   attachEventListeners() {

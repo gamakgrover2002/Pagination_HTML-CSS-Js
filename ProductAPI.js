@@ -10,13 +10,13 @@ class ProductAPI extends BaseProductAPI {
     this.totalPages = 0;
     this.prevPage = 1;
     this.maxLoaaded = 0;
+    this.heightArray = [];
   }
   async fetchpagedata() {
+    if (this.maxLoaaded < this.currentPage) {
+      this.maxLoaaded = this.currentPage;
+    }
     if (this.currentPage > this.totalPages && this.currentPage != 1) {
-      if (this.maxLoaaded < this.currentPage) {
-        this.maxLoaaded = this.currentPage;
-        console.log(this.maxLoaaded);
-      }
       if (this.currentPage > this.totalPages) {
         this.currentPage = this.totalPages;
         render.renderPagination(this.totalPages);
@@ -35,7 +35,8 @@ class ProductAPI extends BaseProductAPI {
     this.completeData = [...this.completeData, ...data];
     this.cache[endpoint] = this.completeData;
     this.totalPages = Math.ceil(response.total / this.limit);
-    console.log(this.currentPage);
+    this.total = response.total;
+
     return this.completeData;
   }
 }
