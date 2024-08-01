@@ -9,9 +9,14 @@ class ProductAPI extends BaseProductAPI {
     this.total;
     this.totalPages = 0;
     this.prevPage = 1;
+    this.maxLoaaded = 0;
   }
   async fetchpagedata() {
     if (this.currentPage > this.totalPages && this.currentPage != 1) {
+      if (this.maxLoaaded < this.currentPage) {
+        this.maxLoaaded = this.currentPage;
+        console.log(this.maxLoaaded);
+      }
       if (this.currentPage > this.totalPages) {
         this.currentPage = this.totalPages;
         render.renderPagination(this.totalPages);

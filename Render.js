@@ -37,9 +37,7 @@ class Render {
   renderPagination(totalPages) {
     const pagination = document.getElementById("pagination");
     this.clearElement(pagination);
-
     pagination.classList.add("scrollable-pagination");
-
     const createButton = (
       label,
       onClick,

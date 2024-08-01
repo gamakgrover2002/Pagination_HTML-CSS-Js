@@ -34,35 +34,42 @@ class ProductHandle {
           let scrollWidth = paginationDivs[1].clientWidth;
 
           if (paginationDivs.length > 1 && containerDivs.length > 0) {
-            console.log(2 * scrollWidth);
             containerDivs[0].scrollTo({
               left: 1.5 * scrollWidth * productAPI.currentPage,
-              behavior: "smooth",
             });
           }
 
           this.scrollTop = scrollTop;
           this.pagepositions[productAPI.currentPage] = scrollTop;
-          this.heightArray[productAPI.currentPage] = Math.ceil(
-            scrollHeight / (clientHeight + 200)
-          );
+          this.heightArray.push(Math.ceil(scrollTop));
         } catch (error) {
           console.error("Error updating pagination and scroll:", error);
         }
       }, 100);
     } else {
-      for (let i = this.heightArray.length - 1; i >= 0; i--) {
+      for (let i = 1; i < this.heightArray.length; i++) {
         if (
-          Math.ceil(scrollHeight / (clientHeight + 200)) < this.heightArray[i]
+          scrollTop >= this.heightArray[i - 1] &&
+          scrollTop < this.heightArray[i]
         ) {
-          productAPI.currentPage = i + 1;
+          let paginationDivs = document.getElementsByClassName("button");
+          let containerDivs = document.getElementsByClassName("number-list");
+          let scrollWidth = paginationDivs[1].clientWidth;
+          productAPI.currentPage = i;
+          console.log(i);
+          render.renderPagination(productAPI.totalPages);
+
+          containerDivs[0].scrollTo({
+            left: scrollWidth * productAPI.currentPage,
+            behavior: "smooth",
+          });
+          break;
         }
       }
     }
   }
   async handlePageChange(pageNum) {
     let paginationDivs = document.getElementsByClassName("button");
-    let containerDivs = document.getElementsByClassName("number-list");
 
     let productsContainer = document.getElementById("products-container");
     let scrollWidth = paginationDivs[1].clientWidth;
@@ -94,7 +101,7 @@ class ProductHandle {
         top: pageNum * clientHeight,
         behavior: "smooth",
       });
-      let buttons = document.getElementsByClassName("button");
+
       productAPI.currentPage = pageNum;
       render.renderPagination(productAPI.totalPages);
     }
