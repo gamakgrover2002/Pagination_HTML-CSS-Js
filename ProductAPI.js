@@ -40,7 +40,7 @@ class ProductAPI extends BaseProductAPI {
       this.totalPages = Math.ceil(response.total / this.limit);
       this.total = response.total;
     }
-    console.log(this.currentPage);
+
     return this.completeData;
   }
 }

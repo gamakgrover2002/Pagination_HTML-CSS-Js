@@ -24,6 +24,14 @@ class ProductHandle {
     } else {
       this.updateCurrentPageBasedOnScroll(scrollTop);
     }
+    let numberListElem = document.getElementsByClassName("number-list")[0];
+    let scrollPosition =
+      (numberListElem.scrollWidth / productAPI.totalPages) *
+      productAPI.currentPage;
+
+    numberListElem.scrollTo({
+      left: scrollPosition - 100,
+    });
   }
 
   async loadNextPageData() {
@@ -52,6 +60,14 @@ class ProductHandle {
     } finally {
       this.isFetching = false;
     }
+    let numberListElem = document.getElementsByClassName("number-list")[0];
+    let scrollPosition =
+      (numberListElem.scrollWidth / productAPI.totalPages) *
+      productAPI.currentPage;
+
+    numberListElem.scrollTo({
+      left: scrollPosition - 100,
+    });
   }
 
   updateCurrentPageBasedOnScroll(scrollTop) {
@@ -62,58 +78,72 @@ class ProductHandle {
       ) {
         if (productAPI.currentPage !== i) {
           productAPI.currentPage = i;
-          render.renderPagination(productAPI.totalPages);
         }
         break;
       }
     }
   }
-
   async handlePageChange(pageNum) {
-    if (pageNum < 1 || pageNum > productAPI.totalPages) return;
+    if (
+      pageNum < 1 ||
+      pageNum > productAPI.totalPages ||
+      pageNum === productAPI.currentPage
+    ) {
+      return;
+    }
 
-    if (pageNum === productAPI.currentPage) return;
+    if (this.isFetching) return;
 
-    if (pageNum <= productAPI.maxLoaded) {
-      productAPI.currentPage = pageNum;
-      render.renderPagination(productAPI.totalPages);
-      this.scrollToMiddleOfPage(pageNum);
-    } else {
-      if (this.isFetching) return;
+    this.isFetching = true;
+    const previousScrollTop = this.elem.scrollTop;
+    this.elem = document.getElementById("products-container");
+    let numberListElem = document.getElementsByClassName("number-list")[0];
 
-      this.isFetching = true;
-      const previousScrollTop = this.elem.scrollTop;
+    try {
+      if (pageNum < productAPI.maxLoaded) {
+        this.scrollToMiddleOfPage(pageNum);
+        productAPI.currentPage = pageNum;
+        render.renderPagination(productAPI.totalPages);
 
-      try {
+        return;
+      } else {
+        productAPI.offset = (pageNum - 1) * productAPI.limit;
+
         const data = await productAPI.fetchPagedData();
+
         if (data.length > 0) {
-          productAPI.offset += productAPI.limit;
           await render.renderProducts(data);
-          productAPI.maxLoaded = pageNum;
 
           const newHeight = this.elem.scrollHeight;
           if (!this.heightArray.includes(newHeight)) {
             this.heightArray.push(newHeight);
           }
-        }
 
-        productAPI.currentPage = pageNum;
-        render.renderPagination(productAPI.totalPages);
-        this.scrollToMiddleOfPage(pageNum);
-      } catch (error) {
-        console.error("Error handling page change:", error);
-      } finally {
-        this.isFetching = false;
+          this.scrollToMiddleOfPage(pageNum);
+        }
       }
+    } catch (error) {
+      console.error("Error handling page change:", error);
+    } finally {
+      this.isFetching = false;
     }
+    productAPI.currentPage = pageNum;
+    render.renderPagination(productAPI.totalPages);
+    let scrollPosition =
+      (numberListElem.scrollWidth / productAPI.totalPages) *
+      productAPI.currentPage;
+
+    numberListElem.scrollTo({
+      left: Math.max(scrollPosition - 100, 0), // Ensure position is within bounds
+    });
   }
 
   scrollToMiddleOfPage(pageNum) {
     const pageHeight =
       this.heightArray[pageNum] - this.heightArray[pageNum - 1];
     const middleOfPage =
-      (this.heightArray[pageNum - 1] + this.heightArray[pageNum]) / 2;
-    this.elem.scrollTop = middleOfPage - this.elem.clientHeight / 2;
+      (this.heightArray[pageNum + 1] + this.heightArray[pageNum]) / 2;
+    this.elem.scrollTop = middleOfPage;
   }
 
   async handleOptionChange() {
@@ -138,12 +168,19 @@ class ProductHandle {
       console.error("Error handling option change:", error);
     }
   }
-
   attachEventListeners() {
     this.elem.addEventListener("scroll", this.handleScroll);
     document
       .querySelector(".options")
       .addEventListener("change", this.handleOptionChange);
+  }
+  generateHeightArray() {
+    const elem = document.getElementsByClassName("product-div")[0];
+
+    this.heightArray = [0];
+    for (let i = 1; i <= productAPI.totalPages; i++) {
+      this.heightArray.push(4.5 * elem.scrollHeight * i);
+    }
   }
 }
 

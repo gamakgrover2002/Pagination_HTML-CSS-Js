@@ -9,6 +9,7 @@ class BaseProductAPI {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      console.log(productAPI.maxLoaded);
       return await response.json();
     } catch (err) {
       console.error("Error fetching data:", err);
