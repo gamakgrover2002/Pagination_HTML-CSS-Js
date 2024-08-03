@@ -24,8 +24,9 @@ class ProductHandle {
     } else {
       this.updateCurrentPageBasedOnScroll(scrollTop);
     }
-    let numberListElem = document.getElementsByClassName("number-list")[0];
-    let scrollPosition =
+
+    const numberListElem = document.getElementsByClassName("number-list")[0];
+    const scrollPosition =
       (numberListElem.scrollWidth / productAPI.totalPages) *
       productAPI.currentPage;
 
@@ -60,8 +61,9 @@ class ProductHandle {
     } finally {
       this.isFetching = false;
     }
-    let numberListElem = document.getElementsByClassName("number-list")[0];
-    let scrollPosition =
+
+    const numberListElem = document.getElementsByClassName("number-list")[0];
+    const scrollPosition =
       (numberListElem.scrollWidth / productAPI.totalPages) *
       productAPI.currentPage;
 
@@ -78,11 +80,13 @@ class ProductHandle {
       ) {
         if (productAPI.currentPage !== i) {
           productAPI.currentPage = i;
+          render.renderPagination(productAPI.totalPages);
         }
         break;
       }
     }
   }
+
   async handlePageChange(pageNum) {
     if (
       pageNum < 1 ||
@@ -93,56 +97,44 @@ class ProductHandle {
     }
 
     if (this.isFetching) return;
-
     this.isFetching = true;
-    const previousScrollTop = this.elem.scrollTop;
-    this.elem = document.getElementById("products-container");
-    let numberListElem = document.getElementsByClassName("number-list")[0];
 
     try {
-      if (pageNum < productAPI.maxLoaded) {
-        this.scrollToMiddleOfPage(pageNum);
-        productAPI.currentPage = pageNum;
-        render.renderPagination(productAPI.totalPages);
+      const productsContainer = this.elem;
+      const numberListElem = document.getElementsByClassName("number-list")[0];
 
-        return;
-      } else {
-        productAPI.offset = (pageNum - 1) * productAPI.limit;
-
-        const data = await productAPI.fetchPagedData();
-
-        if (data.length > 0) {
-          await render.renderProducts(data);
-
-          const newHeight = this.elem.scrollHeight;
-          if (!this.heightArray.includes(newHeight)) {
-            this.heightArray.push(newHeight);
+      if (pageNum > productAPI.currentPage) {
+        if (pageNum > productAPI.maxLoaded) {
+          productAPI.offset = (pageNum - 1) * productAPI.limit;
+          const data = await productAPI.fetchPagedData();
+          if (data.length > 0) {
+            await render.renderProducts(data);
+            const newHeight = productsContainer.scrollHeight;
+            if (!this.heightArray.includes(newHeight)) {
+              this.heightArray.push(newHeight);
+            }
           }
-
-          this.scrollToMiddleOfPage(pageNum);
         }
       }
+
+      productAPI.currentPage = pageNum;
+      const scrollPosition =
+        (numberListElem.scrollWidth / productAPI.totalPages) * pageNum;
+      numberListElem.scrollTo({ left: Math.max(scrollPosition - 100, 0) });
+
+      this.scrollToMiddleOfPage(pageNum);
     } catch (error) {
       console.error("Error handling page change:", error);
     } finally {
       this.isFetching = false;
+      render.renderPagination(productAPI.totalPages);
     }
-    productAPI.currentPage = pageNum;
-    render.renderPagination(productAPI.totalPages);
-    let scrollPosition =
-      (numberListElem.scrollWidth / productAPI.totalPages) *
-      productAPI.currentPage;
-
-    numberListElem.scrollTo({
-      left: Math.max(scrollPosition - 100, 0), // Ensure position is within bounds
-    });
   }
 
   scrollToMiddleOfPage(pageNum) {
     const pageHeight =
       this.heightArray[pageNum] - this.heightArray[pageNum - 1];
-    const middleOfPage =
-      (this.heightArray[pageNum + 1] + this.heightArray[pageNum]) / 2;
+    const middleOfPage = this.heightArray[pageNum - 1] + pageHeight / 2;
     this.elem.scrollTop = middleOfPage;
   }
 
@@ -168,6 +160,7 @@ class ProductHandle {
       console.error("Error handling option change:", error);
     }
   }
+
   attachEventListeners() {
     this.elem.addEventListener("scroll", this.handleScroll);
     document
