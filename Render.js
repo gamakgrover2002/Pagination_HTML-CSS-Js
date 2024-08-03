@@ -32,12 +32,28 @@ class Render {
     });
 
     productsContainer.appendChild(fragment);
+    this.scrollToCurrentPage();
+  }
+
+  scrollToCurrentPage() {
+    const paginationContainer = document.getElementById("pagination");
+    const currentPageButton = paginationContainer.querySelector(".active");
+    if (currentPageButton) {
+      paginationContainer.scrollTo({
+        left:
+          currentPageButton.offsetLeft -
+          paginationContainer.clientWidth / 2 +
+          currentPageButton.clientWidth / 2,
+        behavior: "smooth",
+      });
+    }
   }
 
   renderPagination(totalPages) {
     const pagination = document.getElementById("pagination");
     this.clearElement(pagination);
     pagination.classList.add("scrollable-pagination");
+
     const createButton = (
       label,
       onClick,
@@ -88,6 +104,9 @@ class Render {
         "side-button"
       )
     );
+
+    this.scrollToCurrentPage(); // Ensure pagination scrolls to the active page
   }
 }
+
 const render = new Render();

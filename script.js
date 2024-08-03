@@ -1,27 +1,17 @@
-const navs = ["Home", "About", "Contact"];
-const pages = [];
-
-const navbar = document.getElementById("navs");
-const prevButton = document.getElementById("previous-button");
-const nextButton = document.getElementById("next-button");
-const numButton = document.getElementById("number-buttons");
-
-render.renderElements(navbar, navs, "li");
-
-let numberButton = document.getElementById("number-buttons").childNodes;
-numberButton.forEach((button) => {
-  button.addEventListener("click", handleProduct.handlePageChange);
-});
-
 document.addEventListener("DOMContentLoaded", async () => {
-  let data = await productAPI.fetchpagedata();
+  let data = await productAPI.fetchPagedData();
   productAPI.offset += productAPI.limit;
 
   render.renderPagination(productAPI.totalPages);
-
   render.renderProducts(data);
+
+  const elem = document.getElementById("products-container");
+  handleProduct.heightArray = [0];
+  for (let i = 1; i <= productAPI.totalPages; i++) {
+    handleProduct.heightArray.push(elem.scrollHeight * i);
+  }
+  console.log(handleProduct.heightArray);
 });
 
 let limitElement = document.querySelector(".options");
-
 limitElement.addEventListener("change", handleProduct.handleOptionChange);

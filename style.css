@@ -71,8 +71,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  align-items: flex-start;
-  margin-top: 1vh;
 }
 
 #navs {
@@ -156,15 +154,12 @@ body {
   align-items: flex-start;
   width: 30%;
   overflow-x: scroll;
-  padding: 2vw;
-  height: 10;
   text-align: center;
-  padding-bottom: 0.1vh;
 }
 
 .number-list > button {
-  flex: 1 0 auto;
   margin: 1rem;
+  padding: 10px;
 }
 #number-buttons > button {
   margin: 0 5px;

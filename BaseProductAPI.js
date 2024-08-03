@@ -9,12 +9,12 @@ class BaseProductAPI {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const res = await response.json();
-      return res;
+      return await response.json();
     } catch (err) {
       console.error("Error fetching data:", err);
       return null;
     }
   }
 }
+
 const baseProductAPI = new BaseProductAPI("https://dummyjson.com/products");
